@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conecta Sabor - PDV</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#121214] text-[#E5E1E4] min-h-screen flex flex-col font-['DM_Sans']">
+
+  <header class="bg-[#1E1E24] border-b border-[#2E2E38] p-4 flex justify-between items-center sticky top-0 z-30">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">🔥</span>
+      <div>
+        <h1 class="font-['Space_Grotesk'] font-bold text-lg text-white">CONECTA SABOR</h1>
+        <p class="text-xs text-[#A1A1AA]">Operação: Churrasqueira / Balcão</p>
+      </div>
+    </div>
+    
+    <nav class="flex gap-2">
+      <button id="tab-pdv" onclick="alternarAba('pdv')" class="px-4 py-2 rounded-lg font-bold text-sm bg-[#10B981] text-[#003824]">
+        📱 PDV Rápido
+      </button>
+      <button id="tab-kds" onclick="alternarAba('kds')" class="px-4 py-2 rounded-lg font-bold text-sm bg-[#26262F] text-white">
+        👨‍🍳 Cozinha (KDS)
+      </button>
+    </nav>
+  </header>
+
+  <main class="flex-1 p-4 max-w-7xl mx-auto w-full">
+    <section id="view-pdv" class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div class="lg:col-span-8 flex flex-col gap-4">
+        <div class="flex gap-2 overflow-x-auto pb-1" id="category-pills">
+          <button onclick="filtrarCategoria('todos')" class="px-4 py-2 rounded-full text-xs font-bold bg-[#EA580C] text-white whitespace-nowrap">Todos</button>
+          <button onclick="filtrarCategoria('carnes')" class="px-4 py-2 rounded-full text-xs font-bold bg-[#1E1E24] text-[#A1A1AA] border border-[#2E2E38] whitespace-nowrap">Carnes na Brasa</button>
+          <button onclick="filtrarCategoria('guarnicoes')" class="px-4 py-2 rounded-full text-xs font-bold bg-[#1E1E24] text-[#A1A1AA] border border-[#2E2E38] whitespace-nowrap">Guarnições</button>
+          <button onclick="filtrarCategoria('bebidas')" class="px-4 py-2 rounded-full text-xs font-bold bg-[#1E1E24] text-[#A1A1AA] border border-[#2E2E38] whitespace-nowrap">Bebidas</button>
+        </div>
+
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+      </div>
+
+      <div class="lg:col-span-4 bg-[#1E1E24] border border-[#2E2E38] rounded-xl p-4 flex flex-col justify-between h-fit lg:sticky lg:top-20">
+        <div>
+          <div class="flex justify-between items-center mb-4 pb-2 border-b border-[#2E2E38]">
+            <h2 class="font-['Space_Grotesk'] font-bold text-white">Comanda Atual</h2>
+            <select id="mesa-select" class="bg-[#26262F] text-white border border-[#2E2E38] rounded px-2 py-1 text-sm">
+              <option value="Mesa 01">Mesa 01</option>
+              <option value="Mesa 02">Mesa 02</option>
+              <option value="Mesa 03">Mesa 03</option>
+              <option value="Mesa 04">Mesa 04</option>
+              <option value="Balcão">Balcão</option>
+            </select>
+          </div>
+
+          <div id="cart-list" class="flex flex-col gap-2 max-h-80 overflow-y-auto mb-4">
+            <p class="text-sm text-[#A1A1AA] text-center py-6">Nenhum item adicionado.</p>
+          </div>
+        </div>
+
+        <div class="border-t border-[#2E2E38] pt-4 flex flex-col gap-3">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-[#A1A1AA]">Total Geral:</span>
+            <span id="cart-total" class="font-['Space_Grotesk'] font-bold text-2xl text-[#10B981]">R$ 0,00</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="abrirModalImpressao('abrir')" class="py-3 px-2 rounded-lg bg-[#26262F] border border-[#2E2E38] text-white font-bold text-xs hover:bg-[#32323D] flex items-center justify-center gap-1">
+              🖨️ Cupom
+            </button>
+            <button onclick="enviarPedidoCozinha('enviar')" class="py-3 px-2 rounded-lg bg-[#10B981] text-[#003824] font-bold text-xs hover:bg-[#059669] flex items-center justify-center gap-1">
+              🚀 Cozinha
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-kds" class="hidden flex-col gap-4">
+      <div class="flex justify-between items-center bg-[#1E1E24] p-3 rounded-lg border border-[#2E2E38]">
+        <h2 class="font-['Space_Grotesk'] font-bold text-white flex items-center gap-2">
+          <span>👨‍🍳 Monitor de Pedidos em Tempo Real</span>
+        </h2>
+        <span class="text-xs bg-[#10B981]/20 text-[#10B981] px-2 py-1 rounded">Cozinha Ativa</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <h3 class="font-bold text-sm text-[#EA580C] mb-2 flex items-center gap-1">🔥 Novos (<span id="count-novos">0</span>)</h3>
+          <div id="kds-novos" class="flex flex-col gap-3"></div>
+        </div>
+        <div>
+          <h3 class="font-bold text-sm text-[#F59E0B] mb-2 flex items-center gap-1">⏳ Preparando (<span id="count-preparo">0</span>)</h3>
+          <div id="kds-preparo" class="flex flex-col gap-3"></div>
+        </div>
+        <div>
+          <h3 class="font-bold text-sm text-[#10B981] mb-2 flex items-center gap-1">✅ Prontos (<span id="count-prontos">0</span>)</h3>
+          <div id="kds-prontos" class="flex flex-col gap-3"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="print-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1E1E24] border border-[#2E2E38] rounded-xl max-w-sm w-full p-4 flex flex-col gap-4">
+      <div id="thermal-receipt" class="bg-white text-black font-mono text-xs p-4 rounded shadow">
+        <div class="text-center font-bold pb-2 border-b border-dashed border-gray-400">
+          CONECTA SABOR CHURRASCARIA<br>
+          DOCUMENTO NÃO FISCAL
+        </div>
+        <div class="py-2 text-[11px] border-b border-dashed border-gray-400" id="receipt-header"></div>
+        <div class="py-2 flex flex-col gap-1" id="receipt-items"></div>
+        <div class="pt-2 border-t border-dashed border-gray-400 font-bold flex justify-between" id="receipt-total"></div>
+        <div class="text-center pt-2 text-[10px] text-gray-500">OBRIGADO PELA PREFERÊNCIA</div>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="window.print()" class="flex-1 py-2 bg-[#10B981] text-[#003824] rounded-lg font-bold text-xs">Imprimir</button>
+        <button onclick="abrirModalImpressao('fechar')" class="flex-1 py-2 bg-[#26262F] text-white rounded-lg font-bold text-xs">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+
+  <script src="app.js"></script>
+</body>
+</html>
