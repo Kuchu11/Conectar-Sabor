@@ -3,36 +3,36 @@ new window.VLibras.Widget('https://vlibras.gov.br/app');
 const produtos = [
   { 
     id: 1, 
-    nome: "Picanha na Brasa", 
-    corte: "Corte Nobre 500g",
+    nome: "Picanha na Brasa 500g", 
+    corte: "Corte Nobre com Vinagrete",
     preco: 89.90, 
     categoria: "carnes", 
-    ponto: "Ao Ponto", 
+    ponto: "Ao Ponto / Mal passada", 
     imagem: "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=500&q=80" 
   },
   { 
     id: 2, 
-    nome: "Maminha Manteiga", 
-    corte: "Grelhada 400g",
+    nome: "Maminha Manteiga 400g", 
+    corte: "Grelhada com Manteiga de Garrafa",
     preco: 68.00, 
     categoria: "carnes", 
-    ponto: "Bem Passada", 
+    ponto: "Bem passada", 
     imagem: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80" 
   },
   { 
     id: 3, 
-    nome: "Queijo Coalho", 
-    corte: "c/ Melaço de Cana",
-    preco: 22.00, 
+    nome: "Queijo Coalho c/ Melado", 
+    corte: "2 Espetos Dourados",
+    preco: 44.00, 
     categoria: "guarnicoes", 
     ponto: "", 
     imagem: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=500&q=80" 
   },
   { 
     id: 4, 
-    nome: "Farofa de Bacon", 
-    corte: "Crocante Especial",
-    preco: 18.00, 
+    nome: "Pão de Alho & Vinagrete", 
+    corte: "Porção da Casa",
+    preco: 19.00, 
     categoria: "guarnicoes", 
     ponto: "", 
     imagem: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=500&q=80" 
@@ -40,16 +40,16 @@ const produtos = [
   { 
     id: 5, 
     nome: "Cerveja IPA Puro Malte", 
-    corte: "Lata 473ml Gelada",
-    preco: 18.00, 
+    corte: "Servir com copo congelado",
+    preco: 36.00, 
     categoria: "bebidas", 
     ponto: "", 
     imagem: "https://images.unsplash.com/photo-1608270199144-42f1b4bc0a64?auto=format&fit=crop&w=500&q=80" 
   },
   { 
     id: 6, 
-    nome: "Refrigerante Cola", 
-    corte: "Lata 350ml",
+    nome: "Refrigerante Cola Lata", 
+    corte: "350ml Bem Gelado",
     preco: 7.00, 
     categoria: "bebidas", 
     ponto: "", 
@@ -60,6 +60,18 @@ const produtos = [
 let carrinho = [];
 let categoriaSelecionada = 'todos';
 let termoPesquisa = '';
+
+function alternarCamposEntrega(destino) {
+  const containerDelivery = document.getElementById("campos-delivery");
+  if (destino === 'Delivery') {
+    containerDelivery.classList.remove("hidden");
+    containerDelivery.classList.add("flex");
+  } else {
+    containerDelivery.classList.add("hidden");
+    containerDelivery.classList.remove("flex");
+  }
+  atualizarInterfaceGeral("destino");
+}
 
 function renderizarProdutos(filtroCategoria) {
   const grid = document.getElementById("product-grid");
@@ -153,16 +165,24 @@ function alterarQuantidade(produtoId, delta) {
 function atualizarInterfaceGeral(acao) {
   const totalDisplay = document.getElementById("cart-total");
   const counterDisplay = document.getElementById("cart-counter");
+  const destino = document.getElementById("mesa-select").value;
 
-  let total = 0;
+  let totalItens = 0;
   let quantidadeItens = 0;
 
   carrinho.forEach(function(item) {
-    total += item.preco * item.quantidade;
+    totalItens += item.preco * item.quantidade;
     quantidadeItens += item.quantidade;
   });
 
-  totalDisplay.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+  let taxaEntrega = 0;
+  if (destino === 'Delivery') {
+    const campoTaxa = document.getElementById("delivery-taxa");
+    taxaEntrega = parseFloat(campoTaxa.value) || 0;
+  }
+
+  const totalGeral = totalItens + taxaEntrega;
+  totalDisplay.innerText = `R$ ${totalGeral.toFixed(2).replace('.', ',')}`;
   counterDisplay.innerText = `${quantidadeItens} item(ns)`;
   renderizarProdutos(categoriaSelecionada);
 }
@@ -170,10 +190,26 @@ function atualizarInterfaceGeral(acao) {
 function enviarPedidoCozinha(acao) {
   if (carrinho.length === 0) return;
 
-  const mesa = document.getElementById("mesa-select").value;
+  const destino = document.getElementById("mesa-select").value;
+  let clienteNome = "";
+  let enderecoEntrega = "";
+  let entregadorNome = "";
+  let taxa = 0;
+
+  if (destino === 'Delivery') {
+    clienteNome = document.getElementById("delivery-cliente").value || "Cliente Delivery";
+    enderecoEntrega = document.getElementById("delivery-endereco").value || "Retirada Balcão";
+    entregadorNome = document.getElementById("delivery-entregador").value || "Motoqueiro 01";
+    taxa = parseFloat(document.getElementById("delivery-taxa").value) || 0;
+  }
+
   const novoPedido = {
     id: Date.now(),
-    mesa: mesa,
+    mesa: destino === 'Delivery' ? `🛵 Delivery: ${clienteNome}` : destino,
+    tipo: destino,
+    endereco: enderecoEntrega,
+    entregador: entregadorNome,
+    taxa: taxa,
     horario: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
     status: 'novos',
     itens: [...carrinho]
@@ -181,12 +217,13 @@ function enviarPedidoCozinha(acao) {
 
   const dadosStorage = localStorage.getItem('pedidos_kds_data');
   const pedidosSalvos = dadosStorage ? JSON.parse(dadosStorage) : [];
-  pedidosSalvos.push(novoPedido);
+  pedidosSalvos.unshift(novoPedido);
   localStorage.setItem('pedidos_kds_data', JSON.stringify(pedidosSalvos));
+
+  abrirModalImpressao('abrir');
 
   carrinho = [];
   atualizarInterfaceGeral("limpar");
-  alert("Pedido enviado com sucesso para a cozinha!");
 }
 
 function abrirModalImpressao(comando) {
@@ -194,23 +231,75 @@ function abrirModalImpressao(comando) {
   if (comando === 'abrir') {
     if (carrinho.length === 0) return;
     
-    const mesa = document.getElementById("mesa-select").value;
-    document.getElementById("receipt-header").innerHTML = `TERMINAL: CHURRASQUEIRA 01<br>MESA: ${mesa}<br>DATA: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`;
+    const destino = document.getElementById("mesa-select").value;
+    const header = document.getElementById("receipt-header");
     
-    let total = 0;
+    let infoEntrega = "";
+    let taxa = 0;
+
+    if (destino === 'Delivery') {
+      const cliente = document.getElementById("delivery-cliente").value || "Consumidor";
+      const endereco = document.getElementById("delivery-endereco").value || "Rua do Cliente";
+      const entregador = document.getElementById("delivery-entregador").value || "Entregador Parceiro";
+      taxa = parseFloat(document.getElementById("delivery-taxa").value) || 0;
+
+      infoEntrega = `
+        <div class="mt-1 pt-1 border-t border-dashed border-gray-300">
+          <strong>TIPO:</strong> ENTREGA EM DOMICÍLIO (DELIVERY)<br>
+          <strong>CLIENTE:</strong> ${cliente}<br>
+          <strong>ENDEREÇO:</strong> ${endereco}<br>
+          <strong>ENTREGADOR:</strong> ${entregador}
+        </div>
+      `;
+    }
+
+    header.innerHTML = `
+      DATA/HORA: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}<br>
+      TERMINAL: ESC/POS BT-58 (ID #04)<br>
+      OPERADOR: Carlos M. (Churr. 01)<br>
+      <div class="bg-black text-white font-bold p-1 mt-1 text-center flex justify-between">
+        <span>${destino.toUpperCase()}</span>
+        <span class="text-[#ea580c]">PEDIDO #${Date.now().toString().slice(-4)}</span>
+      </div>
+      ${infoEntrega}
+    `;
+    
+    let subtotal = 0;
     const itemsContainer = document.getElementById("receipt-items");
     itemsContainer.innerHTML = "";
     
     carrinho.forEach(function(item) {
-      const subtotal = item.preco * item.quantidade;
-      total += subtotal;
+      const valorItem = item.preco * item.quantidade;
+      subtotal += valorItem;
+      const detalhePonto = item.ponto ? `<div class="text-[9px] text-[#ea580c]">&gt;&gt; PONTO: ${item.ponto}</div>` : '';
       const div = document.createElement("div");
-      div.className = "flex justify-between";
-      div.innerHTML = `<span>${item.quantidade}x ${item.nome}</span><span>R$ ${subtotal.toFixed(2).replace('.', ',')}</span>`;
+      div.className = "flex flex-col border-b border-dashed border-gray-200 pb-1";
+      div.innerHTML = `
+        <div class="flex justify-between">
+          <span><strong>${item.quantidade}x</strong> ${item.nome}</span>
+          <span>${valorItem.toFixed(2).replace('.', ',')}</span>
+        </div>
+        ${detalhePonto}
+      `;
       itemsContainer.appendChild(div);
     });
 
-    document.getElementById("receipt-total").innerHTML = `<span>TOTAL GERAL:</span><span>R$ ${total.toFixed(2).replace('.', ',')}</span>`;
+    const totalFinal = subtotal + taxa;
+    document.getElementById("receipt-total").innerHTML = `
+      <div class="flex justify-between font-normal text-[10px]">
+        <span>SUBTOTAL:</span>
+        <span>R$ ${subtotal.toFixed(2).replace('.', ',')}</span>
+      </div>
+      <div class="flex justify-between font-normal text-[10px]">
+        <span>TAXA DE ENTREGA:</span>
+        <span>R$ ${taxa.toFixed(2).replace('.', ',')}</span>
+      </div>
+      <div class="flex justify-between font-bold text-sm pt-1 border-t border-dashed border-gray-400">
+        <span>TOTAL GERAL:</span>
+        <span>R$ ${totalFinal.toFixed(2).replace('.', ',')}</span>
+      </div>
+    `;
+
     modal.classList.remove("hidden");
     modal.classList.add("flex");
   } else {

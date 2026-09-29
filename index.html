@@ -56,15 +56,25 @@
       <div class="absolute bottom-0 left-0 right-0 bg-[#18181c]/95 backdrop-blur-md border-t border-[#2e2e38] p-3 flex flex-col gap-2 z-20 shadow-[0_-8px_20px_rgba(0,0,0,0.6)]">
         <div class="flex justify-between items-center text-xs">
           <div class="flex items-center gap-2">
-            <span class="text-[11px] font-bold text-white bg-[#26262f] px-2 py-0.5 rounded border border-[#3b3b47]">Mesa</span>
-            <select id="mesa-select" class="bg-[#121214] text-white text-xs border border-[#2e2e38] rounded px-2 py-1 focus:outline-none">
+            <span class="text-[11px] font-bold text-white bg-[#26262f] px-2 py-0.5 rounded border border-[#3b3b47]">Destino</span>
+            <select id="mesa-select" onchange="alternarCamposEntrega(this.value)" class="bg-[#121214] text-white text-xs border border-[#2e2e38] rounded px-2 py-1 focus:outline-none">
               <option value="Mesa 04">Mesa 04</option>
               <option value="Mesa 08">Mesa 08</option>
               <option value="Mesa 12">Mesa 12</option>
-              <option value="Balcão">Balcão</option>
+              <option value="Balcão">Balcão (Retirada)</option>
+              <option value="Delivery">🛵 Entrega / Delivery</option>
             </select>
           </div>
           <span id="cart-counter" class="text-[11px] text-[#a1a1aa]">0 itens</span>
+        </div>
+
+        <div id="campos-delivery" class="hidden flex-col gap-1.5 bg-[#121214] p-2 rounded-xl border border-[#2e2e38]">
+          <input type="text" id="delivery-cliente" placeholder="Nome do Cliente (Ex: Ana Silva)" class="bg-[#1e1e24] text-white text-[11px] px-2 py-1 rounded border border-[#2e2e38] focus:outline-none focus:border-[#10b981]">
+          <input type="text" id="delivery-endereco" placeholder="Endereço de entrega (Ex: Rua 10, nº 140)" class="bg-[#1e1e24] text-white text-[11px] px-2 py-1 rounded border border-[#2e2e38] focus:outline-none focus:border-[#10b981]">
+          <div class="flex gap-2">
+            <input type="text" id="delivery-entregador" placeholder="Entregador (Ex: Carlos Moto)" class="flex-1 bg-[#1e1e24] text-white text-[11px] px-2 py-1 rounded border border-[#2e2e38] focus:outline-none focus:border-[#10b981]">
+            <input type="number" id="delivery-taxa" oninput="atualizarInterfaceGeral('taxa')" placeholder="Taxa R$" value="7.00" class="w-20 bg-[#1e1e24] text-white text-[11px] px-2 py-1 rounded border border-[#2e2e38] focus:outline-none focus:border-[#10b981]">
+          </div>
         </div>
 
         <div class="grid grid-cols-12 gap-2 items-center">
@@ -76,7 +86,7 @@
           <button onclick="enviarPedidoCozinha('enviar')" class="col-span-9 h-12 bg-[#10b981] hover:bg-[#059669] rounded-xl px-3 flex justify-between items-center text-[#003824] font-bold active:scale-98 transition-all">
             <div class="flex items-center gap-1.5">
               <span>🚀</span>
-              <span class="font-display text-xs uppercase tracking-wide">Enviar Cozinha</span>
+              <span class="font-display text-xs uppercase tracking-wide">Confirmar Pedido</span>
             </div>
             <span id="cart-total" class="font-display text-base text-[#002113]">R$ 0,00</span>
           </button>
@@ -91,12 +101,17 @@
         <div class="text-center font-bold pb-2 border-b border-dashed border-gray-400">
           🔥 FOGO & BRASA<br>
           STEAKHOUSE & PARRILLA<br>
-          <span class="text-[9px] font-normal">DOCUMENTO NÃO FISCAL</span>
+          <span class="text-[9px] font-normal">CNPJ: 12.345.678/0001-90</span><br>
+          <span class="text-[9px] font-normal">WhatsApp: (11) 98765-4321</span>
         </div>
         <div class="py-2 text-[10px] border-b border-dashed border-gray-400" id="receipt-header"></div>
         <div class="py-2 flex flex-col gap-1" id="receipt-items"></div>
-        <div class="pt-2 border-t border-dashed border-gray-400 font-bold flex justify-between text-xs" id="receipt-total"></div>
-        <div class="text-center pt-2 text-[9px] text-gray-500">OBRIGADO PELA PREFERÊNCIA</div>
+        <div class="pt-2 border-t border-dashed border-gray-400 font-bold flex flex-col gap-1 text-xs" id="receipt-total"></div>
+        <div class="text-center pt-2 text-[9px] text-gray-500">
+          *1042-M04-EXP*<br>
+          DOCUMENTO NÃO FISCAL<br>
+          CONTROLE INTERNO • EXPEDIÇÃO
+        </div>
       </div>
       <div class="flex gap-2">
         <button onclick="window.print()" class="flex-1 py-2.5 bg-[#10b981] text-[#003824] rounded-xl font-bold text-xs">Imprimir BT</button>
