@@ -58,7 +58,6 @@ const produtos = [
 ];
 
 let carrinho = [];
-let pedidosKds = [];
 let categoriaSelecionada = 'todos';
 let termoPesquisa = '';
 
@@ -180,99 +179,14 @@ function enviarPedidoCozinha(acao) {
     itens: [...carrinho]
   };
 
-  pedidosKds.push(novoPedido);
+  const dadosStorage = localStorage.getItem('pedidos_kds_data');
+  const pedidosSalvos = dadosStorage ? JSON.parse(dadosStorage) : [];
+  pedidosSalvos.push(novoPedido);
+  localStorage.setItem('pedidos_kds_data', JSON.stringify(pedidosSalvos));
+
   carrinho = [];
   atualizarInterfaceGeral("limpar");
-  renderizarKds("atualizar");
-  alternarAba('kds');
-}
-
-function mudarStatusKds(pedidoId, novoStatus) {
-  const pedido = pedidosKds.find(function(item) { return item.id === pedidoId; });
-  if (pedido) {
-    pedido.status = novoStatus;
-    renderizarKds("atualizar");
-  }
-}
-
-function renderizarKds(acao) {
-  const colNovos = document.getElementById("kds-novos");
-  const colPreparo = document.getElementById("kds-preparo");
-  const colProntos = document.getElementById("kds-prontos");
-
-  colNovos.innerHTML = "";
-  colPreparo.innerHTML = "";
-  colProntos.innerHTML = "";
-
-  let countNovos = 0;
-  let countPreparo = 0;
-  let countProntos = 0;
-
-  pedidosKds.forEach(function(pedido) {
-    const card = document.createElement("div");
-    card.className = "bg-[#18181c] border border-[#2e2e38] rounded-xl p-2.5 flex flex-col gap-2";
-
-    let itensHtml = pedido.itens.map(function(i) {
-      return `<li class="text-[11px] text-white flex justify-between"><span>${i.quantidade}x ${i.nome}</span></li>`;
-    }).join("");
-
-    if (pedido.status === 'novos') {
-      countNovos++;
-      card.innerHTML = `
-        <div class="flex justify-between items-center border-b border-[#2e2e38] pb-1">
-          <span class="font-display font-bold text-white text-xs">${pedido.mesa}</span>
-          <span class="text-[10px] text-[#ea580c] font-bold">⏱️ ${pedido.horario}</span>
-        </div>
-        <ul class="flex flex-col gap-1 py-1">${itensHtml}</ul>
-        <button onclick="mudarStatusKds(${pedido.id}, 'preparo')" class="w-full py-1.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs rounded-lg uppercase">Iniciar Preparo</button>
-      `;
-      colNovos.appendChild(card);
-    } else if (pedido.status === 'preparo') {
-      countPreparo++;
-      card.innerHTML = `
-        <div class="flex justify-between items-center border-b border-[#2e2e38] pb-1">
-          <span class="font-display font-bold text-white text-xs">${pedido.mesa}</span>
-          <span class="text-[10px] text-[#f59e0b] font-bold">Em Grelha</span>
-        </div>
-        <ul class="flex flex-col gap-1 py-1">${itensHtml}</ul>
-        <button onclick="mudarStatusKds(${pedido.id}, 'prontos')" class="w-full py-1.5 bg-[#10b981] text-[#003824] hover:bg-[#059669] font-bold text-xs rounded-lg uppercase">Pronto p/ Servir</button>
-      `;
-      colPreparo.appendChild(card);
-    } else if (pedido.status === 'prontos') {
-      countProntos++;
-      card.innerHTML = `
-        <div class="flex justify-between items-center border-b border-[#2e2e38] pb-1">
-          <span class="font-display font-bold text-white text-xs">${pedido.mesa}</span>
-          <span class="text-[10px] text-[#10b981] font-bold">Concluído</span>
-        </div>
-        <ul class="flex flex-col gap-1 py-1">${itensHtml}</ul>
-      `;
-      colProntos.appendChild(card);
-    }
-  });
-
-  document.getElementById("count-novos").innerText = countNovos;
-  document.getElementById("count-preparo").innerText = countPreparo;
-  document.getElementById("count-prontos").innerText = countProntos;
-}
-
-function alternarAba(aba) {
-  const viewPdv = document.getElementById("view-pdv");
-  const viewKds = document.getElementById("view-kds");
-  const btnPdv = document.getElementById("tab-pdv");
-  const btnKds = document.getElementById("tab-kds");
-
-  if (aba === 'pdv') {
-    viewPdv.classList.remove("hidden");
-    viewKds.classList.add("hidden");
-    btnPdv.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#10b981] text-[#003824]";
-    btnKds.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#26262f] text-[#a1a1aa]";
-  } else {
-    viewPdv.classList.add("hidden");
-    viewKds.classList.remove("hidden");
-    btnKds.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#10b981] text-[#003824]";
-    btnPdv.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#26262f] text-[#a1a1aa]";
-  }
+  alert("Pedido enviado com sucesso para a cozinha!");
 }
 
 function abrirModalImpressao(comando) {

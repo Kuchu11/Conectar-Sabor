@@ -18,8 +18,8 @@
           <span class="text-[10px] bg-[#10b981]/15 text-[#10b981] font-bold px-2 py-0.5 rounded-full border border-[#10b981]/30">● Churrasqueira 01</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <button id="tab-pdv" onclick="alternarAba('pdv')" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#10b981] text-[#003824]">PDV</button>
-          <button id="tab-kds" onclick="alternarAba('kds')" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#26262f] text-[#a1a1aa]">Cozinha</button>
+          <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#10b981] text-[#003824]">PDV</span>
+          <a href="kds.html" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#26262f] hover:bg-[#32323d] text-[#a1a1aa] transition-colors">Cozinha (KDS)</a>
         </div>
       </div>
 
@@ -80,30 +80,6 @@
             </div>
             <span id="cart-total" class="font-display text-base text-[#002113]">R$ 0,00</span>
           </button>
-        </div>
-      </div>
-    </section>
-
-    <section id="view-kds" class="hidden flex-1 flex-col overflow-y-auto p-3 hide-scrollbar">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="font-display font-bold text-white text-sm">MONITOR KDS DA COZINHA</h2>
-        <span class="text-[10px] bg-[#ea580c]/20 text-[#ea580c] font-bold px-2 py-0.5 rounded-full">Fila de Grelha</span>
-      </div>
-
-      <div class="flex flex-col gap-3">
-        <div>
-          <h3 class="font-display font-bold text-xs text-[#ea580c] mb-1.5 uppercase">🔥 Novos Pedidos (<span id="count-novos">0</span>)</h3>
-          <div id="kds-novos" class="flex flex-col gap-2"></div>
-        </div>
-
-        <div>
-          <h3 class="font-display font-bold text-xs text-[#f59e0b] mb-1.5 uppercase">⏳ Em Preparo (<span id="count-preparo">0</span>)</h3>
-          <div id="kds-preparo" class="flex flex-col gap-2"></div>
-        </div>
-
-        <div>
-          <h3 class="font-display font-bold text-xs text-[#10b981] mb-1.5 uppercase">✅ Prontos (<span id="count-prontos">0</span>)</h3>
-          <div id="kds-prontos" class="flex flex-col gap-2"></div>
         </div>
       </div>
     </section>
