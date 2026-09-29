@@ -1,51 +1,131 @@
 new window.VLibras.Widget('https://vlibras.gov.br/app');
 
 const produtos = [
-  { id: 1, nome: "Picanha na Brasa 500g", preco: 89.90, categoria: "carnes", ponto: "Ao Ponto" },
-  { id: 2, nome: "Maminha Manteiga 400g", preco: 68.00, categoria: "carnes", ponto: "Bem Passada" },
-  { id: 3, nome: "Queijo Coalho c/ Melaço", preco: 22.00, categoria: "guarnicoes", ponto: "" },
-  { id: 4, nome: "Farofa Especial Bacon", preco: 18.00, categoria: "guarnicoes", ponto: "" },
-  { id: 5, nome: "Cerveja IPA 500ml", preco: 18.00, categoria: "bebidas", ponto: "" },
-  { id: 6, nome: "Refrigerante Lata", preco: 7.00, categoria: "bebidas", ponto: "" }
+  { 
+    id: 1, 
+    nome: "Picanha na Brasa", 
+    corte: "Corte Nobre 500g",
+    preco: 89.90, 
+    categoria: "carnes", 
+    ponto: "Ao Ponto", 
+    imagem: "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=500&q=80" 
+  },
+  { 
+    id: 2, 
+    nome: "Maminha Manteiga", 
+    corte: "Grelhada 400g",
+    preco: 68.00, 
+    categoria: "carnes", 
+    ponto: "Bem Passada", 
+    imagem: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80" 
+  },
+  { 
+    id: 3, 
+    nome: "Queijo Coalho", 
+    corte: "c/ Melaço de Cana",
+    preco: 22.00, 
+    categoria: "guarnicoes", 
+    ponto: "", 
+    imagem: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=500&q=80" 
+  },
+  { 
+    id: 4, 
+    nome: "Farofa de Bacon", 
+    corte: "Crocante Especial",
+    preco: 18.00, 
+    categoria: "guarnicoes", 
+    ponto: "", 
+    imagem: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=500&q=80" 
+  },
+  { 
+    id: 5, 
+    nome: "Cerveja IPA Puro Malte", 
+    corte: "Lata 473ml Gelada",
+    preco: 18.00, 
+    categoria: "bebidas", 
+    ponto: "", 
+    imagem: "https://images.unsplash.com/photo-1608270199144-42f1b4bc0a64?auto=format&fit=crop&w=500&q=80" 
+  },
+  { 
+    id: 6, 
+    nome: "Refrigerante Cola", 
+    corte: "Lata 350ml",
+    preco: 7.00, 
+    categoria: "bebidas", 
+    ponto: "", 
+    imagem: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=500&q=80" 
+  }
 ];
 
 let carrinho = [];
 let pedidosKds = [];
-let filtroAtivo = 'todos';
+let categoriaSelecionada = 'todos';
+let termoPesquisa = '';
 
-function renderizarProdutos(categoriaFiltro) {
-  const container = document.getElementById("product-grid");
-  container.innerHTML = "";
+function renderizarProdutos(filtroCategoria) {
+  const grid = document.getElementById("product-grid");
+  grid.innerHTML = "";
 
-  const listaFiltrada = categoriaFiltro === 'todos' 
-    ? produtos 
-    : produtos.filter(function(item) { return item.categoria === categoriaFiltro; });
+  const listaFiltrada = produtos.filter(function(item) {
+    const matchCategoria = (filtroCategoria === 'todos') || (item.categoria === filtroCategoria);
+    const matchBusca = item.nome.toLowerCase().includes(termoPesquisa.toLowerCase()) || item.corte.toLowerCase().includes(termoPesquisa.toLowerCase());
+    return matchCategoria && matchBusca;
+  });
 
   listaFiltrada.forEach(function(produto) {
+    const itemNoCarrinho = carrinho.find(function(c) { return c.id === produto.id; });
+    const quantidade = itemNoCarrinho ? itemNoCarrinho.quantidade : 0;
+
     const card = document.createElement("div");
-    card.className = "bg-[#1E1E24] border border-[#2E2E38] rounded-xl p-3 flex flex-col justify-between hover:border-[#10B981] transition-colors";
-    
-    let htmlPonto = produto.ponto ? `<span class="text-[10px] bg-[#EA580C]/20 text-[#EA580C] px-2 py-0.5 rounded-full w-fit mt-1">${produto.ponto}</span>` : '';
+    card.className = "bg-[#1e1e24] border border-[#2e2e38] rounded-2xl overflow-hidden flex flex-col justify-between hover:border-[#10b981] transition-all";
+
+    let badgePonto = produto.ponto ? `<span class="text-[9px] bg-[#ea580c]/20 text-[#ea580c] font-bold px-1.5 py-0.5 rounded-full w-fit mb-1">⦿ ${produto.ponto}</span>` : '';
+
+    let controles = quantidade > 0 
+      ? `
+        <div class="flex items-center justify-between w-full bg-[#121214] rounded-xl p-1 border border-[#2e2e38]">
+          <button onclick="alterarQuantidade(${produto.id}, -1)" class="w-7 h-7 bg-[#26262f] text-white rounded-lg flex items-center justify-center font-bold text-xs active:bg-[#ea580c]">-</button>
+          <span class="font-display font-bold text-white text-xs">${quantidade}</span>
+          <button onclick="alterarQuantidade(${produto.id}, 1)" class="w-7 h-7 bg-[#10b981] text-[#003824] rounded-lg flex items-center justify-center font-bold text-xs active:bg-[#059669]">+</button>
+        </div>
+      `
+      : `
+        <button onclick="adicionarAoCarrinho(${produto.id})" class="w-full py-1.5 bg-[#26262f] hover:bg-[#10b981] hover:text-[#003824] text-white rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 transition-colors">
+          <span>+</span> Adicionar
+        </button>
+      `;
 
     card.innerHTML = `
-      <div>
-        <h4 class="font-bold text-white text-sm leading-tight">${produto.nome}</h4>
-        ${htmlPonto}
+      <div class="h-24 w-full overflow-hidden relative">
+        <img src="${produto.imagem}" alt="${produto.nome}" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-[#1e1e24] via-transparent to-transparent"></div>
       </div>
-      <div class="flex justify-between items-center mt-3 pt-2 border-t border-[#2E2E38]">
-        <span class="font-['Space_Grotesk'] font-bold text-[#10B981] text-sm">R$ ${produto.preco.toFixed(2).replace('.', ',')}</span>
-        <button onclick="adicionarAoCarrinho(${produto.id})" class="h-8 w-8 bg-[#26262F] hover:bg-[#10B981] hover:text-[#003824] rounded-lg flex items-center justify-center font-bold text-white transition-colors">
-          +
-        </button>
+      <div class="p-2.5 flex flex-col gap-1">
+        <h4 class="font-display font-bold text-white text-xs leading-tight truncate">${produto.nome}</h4>
+        <p class="text-[10px] text-[#a1a1aa] leading-none mb-1">${produto.corte}</p>
+        ${badgePonto}
+        <div class="font-display font-bold text-[#10b981] text-xs mb-1.5">
+          R$ ${produto.preco.toFixed(2).replace('.', ',')}
+        </div>
+        ${controles}
       </div>
     `;
-    container.appendChild(card);
+    grid.appendChild(card);
   });
 }
 
-function filtrarCategoria(categoriaNome) {
-  filtroAtivo = categoriaNome;
-  renderizarProdutos(categoriaNome);
+function buscarProduto(texto) {
+  termoPesquisa = texto;
+  renderizarProdutos(categoriaSelecionada);
+}
+
+function filtrarCategoria(categoria, botaoElemento) {
+  categoriaSelecionada = categoria;
+  document.querySelectorAll('.cat-pill').forEach(function(btn) {
+    btn.className = "cat-pill px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#1e1e24] text-[#a1a1aa] border border-[#2e2e38] whitespace-nowrap";
+  });
+  botaoElemento.className = "cat-pill px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#ea580c] text-white whitespace-nowrap";
+  renderizarProdutos(categoria);
 }
 
 function adicionarAoCarrinho(produtoId) {
@@ -57,7 +137,7 @@ function adicionarAoCarrinho(produtoId) {
   } else {
     carrinho.push({ ...produto, quantidade: 1 });
   }
-  atualizarCarrinhoVisual("atualizar");
+  atualizarInterfaceGeral("atualizar");
 }
 
 function alterarQuantidade(produtoId, delta) {
@@ -68,43 +148,24 @@ function alterarQuantidade(produtoId, delta) {
   if (item.quantidade <= 0) {
     carrinho = carrinho.filter(function(elemento) { return elemento.id !== produtoId; });
   }
-  atualizarCarrinhoVisual("atualizar");
+  atualizarInterfaceGeral("atualizar");
 }
 
-function atualizarCarrinhoVisual(acao) {
-  const cartList = document.getElementById("cart-list");
-  const cartTotal = document.getElementById("cart-total");
+function atualizarInterfaceGeral(acao) {
+  const totalDisplay = document.getElementById("cart-total");
+  const counterDisplay = document.getElementById("cart-counter");
 
-  if (carrinho.length === 0) {
-    cartList.innerHTML = `<p class="text-sm text-[#A1A1AA] text-center py-6">Nenhum item adicionado.</p>`;
-    cartTotal.innerText = "R$ 0,00";
-    return;
-  }
-
-  cartList.innerHTML = "";
   let total = 0;
+  let quantidadeItens = 0;
 
   carrinho.forEach(function(item) {
-    const subtotal = item.preco * item.quantidade;
-    total += subtotal;
-
-    const row = document.createElement("div");
-    row.className = "flex justify-between items-center bg-[#26262F] p-2 rounded-lg border border-[#2E2E38]";
-    row.innerHTML = `
-      <div class="flex-1 pr-2">
-        <p class="text-xs font-bold text-white truncate">${item.nome}</p>
-        <p class="text-[10px] text-[#10B981]">R$ ${item.preco.toFixed(2).replace('.', ',')}</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <button onclick="alterarQuantidade(${item.id}, -1)" class="w-6 h-6 bg-[#1E1E24] text-white rounded flex items-center justify-center text-xs">-</button>
-        <span class="text-xs font-bold text-white">${item.quantidade}</span>
-        <button onclick="alterarQuantidade(${item.id}, 1)" class="w-6 h-6 bg-[#1E1E24] text-white rounded flex items-center justify-center text-xs">+</button>
-      </div>
-    `;
-    cartList.appendChild(row);
+    total += item.preco * item.quantidade;
+    quantidadeItens += item.quantidade;
   });
 
-  cartTotal.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+  totalDisplay.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+  counterDisplay.innerText = `${quantidadeItens} item(ns)`;
+  renderizarProdutos(categoriaSelecionada);
 }
 
 function enviarPedidoCozinha(acao) {
@@ -121,15 +182,15 @@ function enviarPedidoCozinha(acao) {
 
   pedidosKds.push(novoPedido);
   carrinho = [];
-  atualizarCarrinhoVisual("limpar");
+  atualizarInterfaceGeral("limpar");
   renderizarKds("atualizar");
   alternarAba('kds');
 }
 
-function mudarStatusKds(pedidoId, proximoStatus) {
+function mudarStatusKds(pedidoId, novoStatus) {
   const pedido = pedidosKds.find(function(item) { return item.id === pedidoId; });
   if (pedido) {
-    pedido.status = proximoStatus;
+    pedido.status = novoStatus;
     renderizarKds("atualizar");
   }
 }
@@ -149,43 +210,40 @@ function renderizarKds(acao) {
 
   pedidosKds.forEach(function(pedido) {
     const card = document.createElement("div");
-    card.className = "bg-[#1E1E24] border border-[#2E2E38] rounded-xl p-3 flex flex-col gap-2 shadow";
+    card.className = "bg-[#18181c] border border-[#2e2e38] rounded-xl p-2.5 flex flex-col gap-2";
 
     let itensHtml = pedido.itens.map(function(i) {
-      return `<li class="text-xs text-white flex justify-between"><span>${i.quantidade}x ${i.nome}</span></li>`;
+      return `<li class="text-[11px] text-white flex justify-between"><span>${i.quantidade}x ${i.nome}</span></li>`;
     }).join("");
 
-    let botoesAcao = "";
     if (pedido.status === 'novos') {
       countNovos++;
-      botoesAcao = `<button onclick="mudarStatusKds(${pedido.id}, 'preparo')" class="w-full py-1.5 bg-[#EA580C] hover:bg-[#c2410c] text-white font-bold text-xs rounded">Iniciar Preparo</button>`;
       card.innerHTML = `
-        <div class="flex justify-between border-b border-[#2E2E38] pb-1">
-          <span class="font-bold text-white text-sm">${pedido.mesa}</span>
-          <span class="text-xs text-[#A1A1AA]">${pedido.horario}</span>
+        <div class="flex justify-between items-center border-b border-[#2e2e38] pb-1">
+          <span class="font-display font-bold text-white text-xs">${pedido.mesa}</span>
+          <span class="text-[10px] text-[#ea580c] font-bold">⏱️ ${pedido.horario}</span>
         </div>
         <ul class="flex flex-col gap-1 py-1">${itensHtml}</ul>
-        ${botoesAcao}
+        <button onclick="mudarStatusKds(${pedido.id}, 'preparo')" class="w-full py-1.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs rounded-lg uppercase">Iniciar Preparo</button>
       `;
       colNovos.appendChild(card);
     } else if (pedido.status === 'preparo') {
       countPreparo++;
-      botoesAcao = `<button onclick="mudarStatusKds(${pedido.id}, 'prontos')" class="w-full py-1.5 bg-[#10B981] text-[#003824] hover:bg-[#059669] font-bold text-xs rounded">Pronto p/ Servir</button>`;
       card.innerHTML = `
-        <div class="flex justify-between border-b border-[#2E2E38] pb-1">
-          <span class="font-bold text-white text-sm">${pedido.mesa}</span>
-          <span class="text-xs text-[#A1A1AA]">${pedido.horario}</span>
+        <div class="flex justify-between items-center border-b border-[#2e2e38] pb-1">
+          <span class="font-display font-bold text-white text-xs">${pedido.mesa}</span>
+          <span class="text-[10px] text-[#f59e0b] font-bold">Em Grelha</span>
         </div>
         <ul class="flex flex-col gap-1 py-1">${itensHtml}</ul>
-        ${botoesAcao}
+        <button onclick="mudarStatusKds(${pedido.id}, 'prontos')" class="w-full py-1.5 bg-[#10b981] text-[#003824] hover:bg-[#059669] font-bold text-xs rounded-lg uppercase">Pronto p/ Servir</button>
       `;
       colPreparo.appendChild(card);
     } else if (pedido.status === 'prontos') {
       countProntos++;
       card.innerHTML = `
-        <div class="flex justify-between border-b border-[#2E2E38] pb-1">
-          <span class="font-bold text-white text-sm">${pedido.mesa}</span>
-          <span class="text-xs text-[#10B981]">Concluído</span>
+        <div class="flex justify-between items-center border-b border-[#2e2e38] pb-1">
+          <span class="font-display font-bold text-white text-xs">${pedido.mesa}</span>
+          <span class="text-[10px] text-[#10b981] font-bold">Concluído</span>
         </div>
         <ul class="flex flex-col gap-1 py-1">${itensHtml}</ul>
       `;
@@ -198,22 +256,22 @@ function renderizarKds(acao) {
   document.getElementById("count-prontos").innerText = countProntos;
 }
 
-function alternarAba(abaDestino) {
+function alternarAba(aba) {
   const viewPdv = document.getElementById("view-pdv");
   const viewKds = document.getElementById("view-kds");
   const btnPdv = document.getElementById("tab-pdv");
   const btnKds = document.getElementById("tab-kds");
 
-  if (abaDestino === 'pdv') {
+  if (aba === 'pdv') {
     viewPdv.classList.remove("hidden");
     viewKds.classList.add("hidden");
-    btnPdv.className = "px-4 py-2 rounded-lg font-bold text-sm bg-[#10B981] text-[#003824]";
-    btnKds.className = "px-4 py-2 rounded-lg font-bold text-sm bg-[#26262F] text-white";
+    btnPdv.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#10b981] text-[#003824]";
+    btnKds.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#26262f] text-[#a1a1aa]";
   } else {
     viewPdv.classList.add("hidden");
     viewKds.classList.remove("hidden");
-    btnKds.className = "px-4 py-2 rounded-lg font-bold text-sm bg-[#10B981] text-[#003824]";
-    btnPdv.className = "px-4 py-2 rounded-lg font-bold text-sm bg-[#26262F] text-white";
+    btnKds.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#10b981] text-[#003824]";
+    btnPdv.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#26262f] text-[#a1a1aa]";
   }
 }
 
@@ -223,7 +281,7 @@ function abrirModalImpressao(comando) {
     if (carrinho.length === 0) return;
     
     const mesa = document.getElementById("mesa-select").value;
-    document.getElementById("receipt-header").innerHTML = `MESA: ${mesa}<br>DATA: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`;
+    document.getElementById("receipt-header").innerHTML = `TERMINAL: CHURRASQUEIRA 01<br>MESA: ${mesa}<br>DATA: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`;
     
     let total = 0;
     const itemsContainer = document.getElementById("receipt-items");

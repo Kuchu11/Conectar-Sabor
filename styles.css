@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@600;700&display=swap');
+
 * {
   box-sizing: border-box;
 }
@@ -5,21 +7,37 @@
 body {
   margin: 0;
   padding: 0;
+  background-color: #0b0b0d;
+  color: #e5e1e4;
+  font-family: 'DM Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+.font-display {
+  font-family: 'Space Grotesk', sans-serif;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
-::-webkit-scrollbar-track {
-  background: #121214;
+.device-frame {
+  max-width: 480px;
+  min-height: 94vh;
+  margin: 1.5rem auto;
+  background-color: #121214;
+  border: 1px solid #2e2e38;
+  border-radius: 36px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px #22222a;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #2E2E38;
-  border-radius: 4px;
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 @media print {
@@ -35,6 +53,6 @@ body {
     top: 0;
     width: 80mm;
     margin: 0;
-    padding: 10px;
+    padding: 12px;
   }
 }
