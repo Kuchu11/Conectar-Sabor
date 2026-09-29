@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conecta Sabor - Cardápio Digital</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#0b0b0d] text-[#e5e1e4] p-0 sm:p-4 flex items-center justify-center min-h-screen">
+
+  <div class="device-frame w-full">
+    <header class="relative bg-[#18181c] border-b border-[#2e2e38] p-4 flex flex-col gap-3">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl text-[#ea580c]">🔥</span>
+          <div>
+            <h1 class="font-display font-bold text-white text-base leading-tight">CONECTA SABOR</h1>
+            <p class="text-[11px] text-[#a1a1aa]">Churrascaria & Parrilla Delivery</p>
+          </div>
+        </div>
+
+        <button onclick="alternarDrawerPerfil('abrir')" class="h-9 w-9 bg-[#26262f] border border-[#2e2e38] rounded-xl flex items-center justify-center text-sm hover:border-[#10b981] transition-colors">
+          👤
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between text-[11px] bg-[#121214] p-2 rounded-xl border border-[#26262f]">
+        <span class="flex items-center gap-1 text-[#10b981]">🟢 Aberto agora</span>
+        <span class="text-[#a1a1aa]">⏱️ Entrega ~40 min</span>
+        <span class="text-[#f59e0b] font-bold">Mínimo R$ 25,00</span>
+      </div>
+
+      <div class="relative">
+        <input type="text" id="cliente-busca" oninput="buscarProdutosCliente(this.value)" placeholder="O que você deseja comer hoje?" class="w-full bg-[#121214] border border-[#2e2e38] rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-[#71717a] focus:outline-none focus:border-[#10b981]">
+        <span class="absolute left-3 top-2.5 text-xs text-[#71717a]">🔍</span>
+      </div>
+
+      <div class="flex gap-1.5 overflow-x-auto hide-scrollbar" id="cliente-category-pills">
+        <button onclick="filtrarCategoriaCliente('todos', this)" class="cli-pill px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#ea580c] text-white whitespace-nowrap">🔥 Todos</button>
+        <button onclick="filtrarCategoriaCliente('carnes', this)" class="cli-pill px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#1e1e24] text-[#a1a1aa] border border-[#2e2e38] whitespace-nowrap">🥩 Carnes</button>
+        <button onclick="filtrarCategoriaCliente('guarnicoes', this)" class="cli-pill px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#1e1e24] text-[#a1a1aa] border border-[#2e2e38] whitespace-nowrap">🍚 Acompanhamentos</button>
+        <button onclick="filtrarCategoriaCliente('bebidas', this)" class="cli-pill px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#1e1e24] text-[#a1a1aa] border border-[#2e2e38] whitespace-nowrap">🍺 Bebidas</button>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-3 hide-scrollbar">
+      <h2 class="font-display font-bold text-xs uppercase tracking-wide text-[#a1a1aa] mb-3">Destaques da Brasa</h2>
+      <div id="cliente-product-grid" class="flex flex-col gap-3 pb-28"></div>
+    </main>
+
+    <footer class="absolute bottom-0 left-0 right-0 bg-[#18181c]/95 backdrop-blur-md border-t border-[#2e2e38] p-3 flex justify-between items-center z-20">
+      <div>
+        <span class="text-[10px] text-[#a1a1aa] block" id="cliente-resumo-carrinho">0 itens selecionados</span>
+        <span class="font-display font-bold text-lg text-[#10b981]" id="cliente-total-carrinho">R$ 0,00</span>
+      </div>
+
+      <button onclick="abrirCheckoutCliente('abrir')" class="h-11 px-5 bg-[#10b981] hover:bg-[#059669] text-[#003824] rounded-xl font-display font-bold text-xs uppercase tracking-wider flex items-center gap-2 active:scale-95 transition-all">
+        <span>Avançar</span>
+        <span>→</span>
+      </button>
+    </footer>
+
+    <div id="drawer-perfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-40">
+      <div class="absolute right-0 top-0 bottom-0 w-80 bg-[#18181c] border-l border-[#2e2e38] p-5 flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-center mb-6 pb-3 border-b border-[#2e2e38]">
+            <h3 class="font-display font-bold text-white text-base">Identificação</h3>
+            <button onclick="alternarDrawerPerfil('fechar')" class="text-white text-sm">✕</button>
+          </div>
+
+          <div class="flex flex-col gap-3">
+            <div>
+              <label class="text-[11px] text-[#a1a1aa] block mb-1">Telefone WhatsApp</label>
+              <input type="tel" id="cli-ident-tel" placeholder="(85) 99999-9999" class="w-full bg-[#121214] border border-[#2e2e38] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#10b981]">
+            </div>
+
+            <div>
+              <label class="text-[11px] text-[#a1a1aa] block mb-1">E-mail</label>
+              <input type="email" id="cli-ident-email" placeholder="seuemail@exemplo.com" class="w-full bg-[#121214] border border-[#2e2e38] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#10b981]">
+            </div>
+
+            <div>
+              <label class="text-[11px] text-[#a1a1aa] block mb-1">Seu Nome</label>
+              <input type="text" id="cli-ident-nome" placeholder="Como devemos te chamar?" class="w-full bg-[#121214] border border-[#2e2e38] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#10b981]">
+            </div>
+          </div>
+        </div>
+
+        <button onclick="salvarIdentificacaoCliente('salvar')" class="w-full py-2.5 bg-[#10b981] text-[#003824] rounded-xl font-bold text-xs uppercase tracking-wide">
+          Salvar Dados
+        </button>
+      </div>
+    </div>
+
+    <div id="modal-checkout" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+      <div class="bg-[#18181c] border border-[#2e2e38] rounded-2xl max-w-sm w-full p-4 flex flex-col gap-3 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center pb-2 border-b border-[#2e2e38]">
+          <h3 class="font-display font-bold text-white text-sm">Finalizar Pedido</h3>
+          <button onclick="abrirCheckoutCliente('fechar')" class="text-white text-xs">✕</button>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-[11px] text-[#a1a1aa]">Endereço Completo de Entrega</label>
+          <input type="text" id="chk-endereco" placeholder="Rua, número, complemento e bairro" class="bg-[#121214] border border-[#2e2e38] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#10b981]">
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-[11px] text-[#a1a1aa]">Forma de Pagamento</label>
+          <select id="chk-pagamento" class="bg-[#121214] text-white text-xs border border-[#2e2e38] rounded-xl px-3 py-2 focus:outline-none focus:border-[#10b981]">
+            <option value="PIX (Chave Instantânea)">💠 PIX (Aprovação Imediata)</option>
+            <option value="Cartão de Crédito">💳 Cartão de Crédito (na entrega)</option>
+            <option value="Cartão de Débito">💳 Cartão de Débito (na entrega)</option>
+            <option value="Dinheiro">💵 Dinheiro (Troco)</option>
+          </select>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-[11px] text-[#a1a1aa]">Observações do Pedido</label>
+          <input type="text" id="chk-observacao" placeholder="Ex: Carne ao ponto, sem cebola, etc." class="bg-[#121214] border border-[#2e2e38] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#10b981]">
+        </div>
+
+        <div class="bg-[#121214] p-3 rounded-xl border border-[#26262f] flex flex-col gap-1 text-xs">
+          <div class="flex justify-between text-[#a1a1aa]">
+            <span>Subtotal:</span>
+            <span id="chk-subtotal">R$ 0,00</span>
+          </div>
+          <div class="flex justify-between text-[#a1a1aa]">
+            <span>Taxa de Entrega:</span>
+            <span>R$ 7,00</span>
+          </div>
+          <div class="flex justify-between font-bold text-white pt-1 border-t border-[#2e2e38]">
+            <span>Total a Pagar:</span>
+            <span id="chk-total" class="text-[#10b981]">R$ 0,00</span>
+          </div>
+        </div>
+
+        <button onclick="confirmarPedidoOnline('confirmar')" class="w-full py-3 bg-[#10b981] hover:bg-[#059669] text-[#003824] font-display font-bold text-xs uppercase tracking-wide rounded-xl active:scale-95 transition-all">
+          Enviar Pedido para a Cozinha
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+
+  <script>
+    new window.VLibras.Widget('https://vlibras.gov.br/app');
+
+    const catalogo = [
+      { 
+        id: 1, 
+        nome: "Picanha na Brasa 500g", 
+        descricao: "Corte nobre grelhado na brasa com farofa crocante e vinagrete.", 
+        preco: 89.90, 
+        categoria: "carnes",
+        imagem: "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=500&q=80"
+      },
+      { 
+        id: 2, 
+        nome: "Maminha Manteiga 400g", 
+        descricao: "Carne macia regada na manteiga de garrafa artesanal.", 
+        preco: 68.00, 
+        categoria: "carnes",
+        imagem: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      { 
+        id: 3, 
+        nome: "Queijo Coalho c/ Melado", 
+        descricao: "2 Espetos dourados com toque suave de melaço nordestino.", 
+        preco: 44.00, 
+        categoria: "guarnicoes",
+        imagem: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=500&q=80"
+      },
+      { 
+        id: 4, 
+        nome: "Pão de Alho Especial", 
+        descricao: "Crocante por fora e recheio cremoso de alho com ervas.", 
+        preco: 19.00, 
+        categoria: "guarnicoes",
+        imagem: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=500&q=80"
+      },
+      { 
+        id: 5, 
+        nome: "Cerveja IPA Artesanal", 
+        descricao: "Lata 473ml puro malte gelada no ponto.", 
+        preco: 36.00, 
+        categoria: "bebidas",
+        imagem: "https://images.unsplash.com/photo-1608270199144-42f1b4bc0a64?auto=format&fit=crop&w=500&q=80"
+      },
+      { 
+        id: 6, 
+        nome: "Refrigerante Gelado 350ml", 
+        descricao: "Lata tradicional servida bem gelada.", 
+        preco: 7.00, 
+        categoria: "bebidas",
+        imagem: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=500&q=80"
+      }
+    ];
+
+    let carrinhoCliente = [];
+    let categoriaAtiva = 'todos';
+    let buscaTexto = '';
+
+    function renderizarCardapioCliente(categoria) {
+      const container = document.getElementById('cliente-product-grid');
+      container.innerHTML = '';
+
+      const lista = catalogo.filter(function(item) {
+        const matchCat = (categoria === 'todos') || (item.categoria === categoria);
+        const matchBusca = item.nome.toLowerCase().includes(buscaTexto.toLowerCase()) || item.descricao.toLowerCase().includes(buscaTexto.toLowerCase());
+        return matchCat && matchBusca;
+      });
+
+      lista.forEach(function(item) {
+        const noCarrinho = carrinhoCliente.find(function(c) { return c.id === item.id; });
+        const qtd = noCarrinho ? noCarrinho.quantidade : 0;
+
+        const card = document.createElement('div');
+        card.className = "bg-[#18181c] border border-[#2e2e38] rounded-2xl p-3 flex gap-3 items-center hover:border-[#10b981] transition-colors";
+
+        let botaoQtd = qtd > 0 
+          ? `
+            <div class="flex items-center gap-2 bg-[#121214] px-2 py-1 rounded-xl border border-[#2e2e38]">
+              <button onclick="mudarQtdCliente(${item.id}, -1)" class="text-white text-xs font-bold px-1">-</button>
+              <span class="text-white text-xs font-bold font-display">${qtd}</span>
+              <button onclick="mudarQtdCliente(${item.id}, 1)" class="text-[#10b981] text-xs font-bold px-1">+</button>
+            </div>
+          `
+          : `
+            <button onclick="adicionarItemCliente(${item.id})" class="px-3 py-1.5 bg-[#26262f] hover:bg-[#10b981] hover:text-[#003824] text-white rounded-xl text-xs font-bold transition-colors">
+              + Adicionar
+            </button>
+          `;
+
+        card.innerHTML = `
+          <img src="${item.imagem}" alt="${item.nome}" class="w-20 h-20 rounded-xl object-cover">
+          <div class="flex-1 flex flex-col justify-between h-full">
+            <div>
+              <h3 class="font-display font-bold text-white text-xs leading-tight">${item.nome}</h3>
+              <p class="text-[10px] text-[#a1a1aa] leading-snug line-clamp-2 mt-0.5">${item.descricao}</p>
+            </div>
+            <div class="flex justify-between items-center mt-2">
+              <span class="font-display font-bold text-[#10b981] text-xs">R$ ${item.preco.toFixed(2).replace('.', ',')}</span>
+              ${botaoQtd}
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function buscarProdutosCliente(valor) {
+      buscaTexto = valor;
+      renderizarCardapioCliente(categoriaAtiva);
+    }
+
+    function filtrarCategoriaCliente(cat, elementoBotao) {
+      categoriaAtiva = cat;
+      document.querySelectorAll('.cli-pill').forEach(function(btn) {
+        btn.className = "cli-pill px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#1e1e24] text-[#a1a1aa] border border-[#2e2e38] whitespace-nowrap";
+      });
+      elementoBotao.className = "cli-pill px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#ea580c] text-white whitespace-nowrap";
+      renderizarCardapioCliente(cat);
+    }
+
+    function adicionarItemCliente(idProduto) {
+      const prod = catalogo.find(function(p) { return p.id === idProduto; });
+      const existente = carrinhoCliente.find(function(p) { return p.id === idProduto; });
+
+      if (existente) {
+        existente.quantidade += 1;
+      } else {
+        carrinhoCliente.push({ ...prod, quantidade: 1 });
+      }
+      atualizarRodapeCliente('atualizar');
+    }
+
+    function mudarQtdCliente(idProduto, delta) {
+      const item = carrinhoCliente.find(function(p) { return p.id === idProduto; });
+      if (!item) return;
+
+      item.quantidade += delta;
+      if (item.quantidade <= 0) {
+        carrinhoCliente = carrinhoCliente.filter(function(p) { return p.id !== idProduto; });
+      }
+      atualizarRodapeCliente('atualizar');
+    }
+
+    function atualizarRodapeCliente(acao) {
+      let subtotal = 0;
+      let totalItens = 0;
+
+      carrinhoCliente.forEach(function(i) {
+        subtotal += i.preco * i.quantidade;
+        totalItens += i.quantidade;
+      });
+
+      document.getElementById('cliente-resumo-carrinho').innerText = `${totalItens} item(ns) selecionado(s)`;
+      document.getElementById('cliente-total-carrinho').innerText = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+      renderizarCardapioCliente(categoriaAtiva);
+    }
+
+    function alternarDrawerPerfil(comando) {
+      const drawer = document.getElementById('drawer-perfil');
+      if (comando === 'abrir') {
+        drawer.classList.remove('hidden');
+      } else {
+        drawer.classList.add('hidden');
+      }
+    }
+
+    function salvarIdentificacaoCliente(acao) {
+      const nome = document.getElementById('cli-ident-nome').value;
+      const tel = document.getElementById('cli-ident-tel').value;
+      if (!nome || !tel) {
+        alert("Preencha ao menos seu nome e telefone!");
+        return;
+      }
+      localStorage.setItem('cliente_perfil_nome', nome);
+      localStorage.setItem('cliente_perfil_tel', tel);
+      alternarDrawerPerfil('fechar');
+      alert(`Identificado com sucesso: ${nome}`);
+    }
+
+    function abrirCheckoutCliente(comando) {
+      const modal = document.getElementById('modal-checkout');
+      if (comando === 'abrir') {
+        if (carrinhoCliente.length === 0) {
+          alert("Adicione ao menos um item ao seu pedido antes de avançar.");
+          return;
+        }
+
+        const nomeSalvo = localStorage.getItem('cliente_perfil_nome') || '';
+        const telSalvo = localStorage.getItem('cliente_perfil_tel') || '';
+
+        if (!nomeSalvo && !telSalvo) {
+          alternarDrawerPerfil('abrir');
+          alert("Por favor, informe seu telefone e nome antes de continuar.");
+          return;
+        }
+
+        let subtotal = 0;
+        carrinhoCliente.forEach(function(i) {
+          subtotal += i.preco * i.quantidade;
+        });
+
+        document.getElementById('chk-subtotal').innerText = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+        document.getElementById('chk-total').innerText = `R$ ${(subtotal + 7.00).toFixed(2).replace('.', ',')}`;
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function confirmarPedidoOnline(acao) {
+      const endereco = document.getElementById('chk-endereco').value;
+      if (!endereco) {
+        alert("Por favor, digite o endereço de entrega!");
+        return;
+      }
+
+      const formaPagto = document.getElementById('chk-pagamento').value;
+      const observacao = document.getElementById('chk-observacao').value;
+      const nomeCliente = localStorage.getItem('cliente_perfil_nome') || "Consumidor Online";
+      const telCliente = localStorage.getItem('cliente_perfil_tel') || "";
+
+      const novoPedido = {
+        id: Date.now(),
+        mesa: `🛵 Delivery Online: ${nomeCliente}`,
+        origem: "Cardápio Web Cliente",
+        endereco: endereco,
+        formaPagamento: formaPagto,
+        telefone: telCliente,
+        taxa: 7.00,
+        horario: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        status: 'novos',
+        observacao: `${observacao ? observacao + ' | ' : ''}Pagamento: ${formaPagto}`,
+        itens: [...carrinhoCliente]
+      };
+
+      const dadosStorage = localStorage.getItem('pedidos_kds_data');
+      const pedidosSalvos = dadosStorage ? JSON.parse(dadosStorage) : [];
+      pedidosSalvos.unshift(novoPedido);
+      localStorage.setItem('pedidos_kds_data', JSON.stringify(pedidosSalvos));
+
+      carrinhoCliente = [];
+      atualizarRodapeCliente('limpar');
+      abrirCheckoutCliente('fechar');
+      alert(`Seu pedido foi confirmado e enviado para a cozinha! Forma de Pagamento escolhida: ${formaPagto}`);
+    }
+
+    renderizarCardapioCliente('todos');
+  </script>
+</body>
+</html>
