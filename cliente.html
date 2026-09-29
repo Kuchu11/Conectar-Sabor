@@ -374,32 +374,29 @@
       const nomeCliente = localStorage.getItem('cliente_perfil_nome') || "Consumidor Online";
       const telCliente = localStorage.getItem('cliente_perfil_tel') || "";
 
-      const novoPedido = {
+      const pedidoPendente = {
         id: Date.now(),
-        mesa: `🛵 Delivery Online: ${nomeCliente}`,
-        origem: "Cardápio Web Cliente",
+        mesa: `🛵 Delivery: ${nomeCliente}`,
+        cliente: nomeCliente,
+        telefone: telCliente,
         endereco: endereco,
         formaPagamento: formaPagto,
-        telefone: telCliente,
         taxa: 7.00,
         horario: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-        status: 'novos',
         observacao: `${observacao ? observacao + ' | ' : ''}Pagamento: ${formaPagto}`,
         itens: [...carrinhoCliente]
       };
 
-      const dadosStorage = localStorage.getItem('pedidos_kds_data');
-      const pedidosSalvos = dadosStorage ? JSON.parse(dadosStorage) : [];
-      pedidosSalvos.unshift(novoPedido);
-      localStorage.setItem('pedidos_kds_data', JSON.stringify(pedidosSalvos));
+      const dadosStorage = localStorage.getItem('pedidos_pendentes_aprovacao');
+      const pedidosPendentes = dadosStorage ? JSON.parse(dadosStorage) : [];
+      pedidosPendentes.push(pedidoPendente);
+      localStorage.setItem('pedidos_pendentes_aprovacao', JSON.stringify(pedidosPendentes));
 
       carrinhoCliente = [];
       atualizarRodapeCliente('limpar');
       abrirCheckoutCliente('fechar');
-      alert(`Seu pedido foi confirmado e enviado para a cozinha! Forma de Pagamento escolhida: ${formaPagto}`);
+      alert("Pedido enviado! Aguarde a confirmação do atendente no PDV.");
     }
-
-    renderizarCardapioCliente('todos');
   </script>
 </body>
 </html>

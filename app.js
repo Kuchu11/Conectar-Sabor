@@ -309,3 +309,261 @@ function abrirModalImpressao(comando) {
 }
 
 renderizarProdutos("todos");
+function verificarPedidosPendentes(origem) {
+  const dados = localStorage.getItem('pedidos_pendentes_aprovacao');
+  const pendentes = dados ? JSON.parse(dados) : [];
+  const banner = document.getElementById('banner-pedidos-online');
+  const countBadge = document.getElementById('badge-pendentes-count');
+
+  if (pendentes.length > 0) {
+    banner.classList.remove('hidden');
+    banner.classList.add('flex');
+    countBadge.innerText = pendentes.length;
+  } else {
+    banner.classList.add('hidden');
+    banner.classList.remove('flex');
+  }
+}
+
+function abrirModalPendentes(comando) {
+  const modal = document.getElementById('modal-pendentes');
+  if (comando === 'abrir') {
+    renderizarListaPendentes('render');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  } else {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+function renderizarListaPendentes(acao) {
+  const container = document.getElementById('lista-pendentes-container');
+  container.innerHTML = '';
+
+  const dados = localStorage.getItem('pedidos_pendentes_aprovacao');
+  const pendentes = dados ? JSON.parse(dados) : [];
+
+  if (pendentes.length === 0) {
+    container.innerHTML = `<p class="text-xs text-[#a1a1aa] text-center py-4">Nenhum pedido pendente.</p>`;
+    return;
+  }
+
+  pendentes.forEach(function(ped) {
+    let subtotal = 0;
+    let itensHtml = ped.itens.map(function(i) {
+      subtotal += i.preco * i.quantidade;
+      return `<li class="text-[11px] text-white flex justify-between"><span>${i.quantidade}x ${i.nome}</span><span>R$ ${(i.preco * i.quantidade).toFixed(2).replace('.', ',')}</span></li>`;
+    }).join('');
+
+    const total = subtotal + (ped.taxa || 0);
+
+    const card = document.createElement('div');
+    card.className = "bg-[#121214] border border-[#2e2e38] rounded-xl p-3 flex flex-col gap-2";
+    card.innerHTML = `
+      <div class="flex justify-between items-start border-b border-[#26262f] pb-1.5">
+        <div>
+          <h4 class="font-display font-bold text-white text-xs">${ped.mesa}</h4>
+          <p class="text-[10px] text-[#a1a1aa]">📱 ${ped.telefone || 'Sem tel'} • ⏱️ ${ped.horario}</p>
+        </div>
+        <span class="text-[10px] text-[#f59e0b] font-bold bg-[#f59e0b]/10 px-1.5 py-0.5 rounded">Pendente</span>
+      </div>
+      <p class="text-[10px] text-[#e4e4e7]">📍 <strong>Endereço:</strong> ${ped.endereco}</p>
+      <p class="text-[10px] text-[#10b981]">💳 <strong>Pagamento:</strong> ${ped.formaPagamento}</p>
+      <ul class="flex flex-col gap-1 border-y border-[#26262f] py-1.5 my-1">${itensHtml}</ul>
+      <div class="flex justify-between font-bold text-xs text-white">
+        <span>Total:</span>
+        <span class="text-[#10b981]">R$ ${total.toFixed(2).replace('.', ',')}</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2 mt-2">
+        <button onclick="recusarPedidoOnline(${ped.id})" class="py-1.5 bg-[#26262f] hover:bg-[#32323d] text-[#ef4444] rounded-lg text-xs font-bold">Recusar</button>
+        <button onclick="aprovarEnviarCozinha(${ped.id})" class="py-1.5 bg-[#10b981] hover:bg-[#059669] text-[#003824] rounded-lg text-xs font-bold font-display uppercase">Aprovar &amp; Cozinha</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function aprovarEnviarCozinha(idPedido) {
+  const dados = localStorage.getItem('pedidos_pendentes_aprovacao');
+  let pendentes = dados ? JSON.parse(dados) : [];
+  const pedido = pendentes.find(function(p) { return p.id === idPedido; });
+
+  if (!pedido) return;
+
+  const novoKds = {
+    ...pedido,
+    status: 'novos',
+    origem: 'Aprovado pelo Caixa PDV'
+  };
+
+  const dadosKds = localStorage.getItem('pedidos_kds_data');
+  const pedidosKds = dadosKds ? JSON.parse(dadosKds) : [];
+  pedidosKds.unshift(novoKds);
+  localStorage.setItem('pedidos_kds_data', JSON.stringify(pedidosKds));
+
+  pendentes = pendentes.filter(function(p) { return p.id !== idPedido; });
+  localStorage.setItem('pedidos_pendentes_aprovacao', JSON.stringify(pendentes));
+
+  verificarPedidosPendentes('atualizar');
+  renderizarListaPendentes('atualizar');
+  if (pendentes.length === 0) {
+    abrirModalPendentes('fechar');
+  }
+
+  alert("Pedido aprovado e despachado para a tela da cozinha!");
+}
+
+function recusarPedidoOnline(idPedido) {
+  const dados = localStorage.getItem('pedidos_pendentes_aprovacao');
+  let pendentes = dados ? JSON.parse(dados) : [];
+  pendentes = pendentes.filter(function(p) { return p.id !== idPedido; });
+  localStorage.setItem('pedidos_pendentes_aprovacao', JSON.stringify(pendentes));
+
+  verificarPedidosPendentes('atualizar');
+  renderizarListaPendentes('atualizar');
+  if (pendentes.length === 0) {
+    abrirModalPendentes('fechar');
+  }
+}
+
+window.addEventListener('storage', function(evento) {
+  if (evento.key === 'pedidos_pendentes_aprovacao') {
+    verificarPedidosPendentes('storage');
+  }
+});
+
+setInterval(function() {
+  verificarPedidosPendentes('interval');
+}, 2000);
+
+verificarPedidosPendentes('inicial');
+function verificarPedidosPendentes(origem) {
+  const dados = localStorage.getItem('pedidos_pendentes_aprovacao');
+  const pendentes = dados ? JSON.parse(dados) : [];
+  const banner = document.getElementById('banner-pedidos-online');
+  const countBadge = document.getElementById('badge-pendentes-count');
+
+  if (pendentes.length > 0) {
+    banner.classList.remove('hidden');
+    banner.classList.add('flex');
+    countBadge.innerText = pendentes.length;
+  } else {
+    banner.classList.add('hidden');
+    banner.classList.remove('flex');
+  }
+}
+
+function abrirModalPendentes(comando) {
+  const modal = document.getElementById('modal-pendentes');
+  if (comando === 'abrir') {
+    renderizarListaPendentes('render');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  } else {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+function renderizarListaPendentes(acao) {
+  const container = document.getElementById('lista-pendentes-container');
+  container.innerHTML = '';
+
+  const dados = localStorage.getItem('pedidos_pendentes_aprovacao');
+  const pendentes = dados ? JSON.parse(dados) : [];
+
+  if (pendentes.length === 0) {
+    container.innerHTML = `<p class="text-xs text-[#a1a1aa] text-center py-4">Nenhum pedido pendente.</p>`;
+    return;
+  }
+
+  pendentes.forEach(function(ped) {
+    let subtotal = 0;
+    let itensHtml = ped.itens.map(function(i) {
+      subtotal += i.preco * i.quantidade;
+      return `<li class="text-[11px] text-white flex justify-between"><span>${i.quantidade}x ${i.nome}</span><span>R$ ${(i.preco * i.quantidade).toFixed(2).replace('.', ',')}</span></li>`;
+    }).join('');
+
+    const total = subtotal + (ped.taxa || 0);
+
+    const card = document.createElement('div');
+    card.className = "bg-[#121214] border border-[#2e2e38] rounded-xl p-3 flex flex-col gap-2";
+    card.innerHTML = `
+      <div class="flex justify-between items-start border-b border-[#26262f] pb-1.5">
+        <div>
+          <h4 class="font-display font-bold text-white text-xs">${ped.mesa}</h4>
+          <p class="text-[10px] text-[#a1a1aa]">📱 ${ped.telefone || 'Sem tel'} • ⏱️ ${ped.horario}</p>
+        </div>
+        <span class="text-[10px] text-[#f59e0b] font-bold bg-[#f59e0b]/10 px-1.5 py-0.5 rounded">Pendente</span>
+      </div>
+      <p class="text-[10px] text-[#e4e4e7]">📍 <strong>Endereço:</strong> ${ped.endereco}</p>
+      <p class="text-[10px] text-[#10b981]">💳 <strong>Pagamento:</strong> ${ped.formaPagamento}</p>
+      <ul class="flex flex-col gap-1 border-y border-[#26262f] py-1.5 my-1">${itensHtml}</ul>
+      <div class="flex justify-between font-bold text-xs text-white">
+        <span>Total:</span>
+        <span class="text-[#10b981]">R$ ${total.toFixed(2).replace('.', ',')}</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2 mt-2">
+        <button onclick="recusarPedidoOnline(${ped.id})" class="py-1.5 bg-[#26262f] hover:bg-[#32323d] text-[#ef4444] rounded-lg text-xs font-bold">Recusar</button>
+        <button onclick="aprovarEnviarCozinha(${ped.id})" class="py-1.5 bg-[#10b981] hover:bg-[#059669] text-[#003824] rounded-lg text-xs font-bold font-display uppercase">Aprovar &amp; Cozinha</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function aprovarEnviarCozinha(idPedido) {
+  const dados = localStorage.getItem('pedidos_pendentes_aprovacao');
+  let pendentes = dados ? JSON.parse(dados) : [];
+  const pedido = pendentes.find(function(p) { return p.id === idPedido; });
+
+  if (!pedido) return;
+
+  const novoKds = {
+    ...pedido,
+    status: 'novos',
+    origem: 'Aprovado pelo Caixa PDV'
+  };
+
+  const dadosKds = localStorage.getItem('pedidos_kds_data');
+  const pedidosKds = dadosKds ? JSON.parse(dadosKds) : [];
+  pedidosKds.unshift(novoKds);
+  localStorage.setItem('pedidos_kds_data', JSON.stringify(pedidosKds));
+
+  pendentes = pendentes.filter(function(p) { return p.id !== idPedido; });
+  localStorage.setItem('pedidos_pendentes_aprovacao', JSON.stringify(pendentes));
+
+  verificarPedidosPendentes('atualizar');
+  renderizarListaPendentes('atualizar');
+  if (pendentes.length === 0) {
+    abrirModalPendentes('fechar');
+  }
+
+  alert("Pedido aprovado e despachado para a tela da cozinha!");
+}
+
+function recusarPedidoOnline(idPedido) {
+  const dados = localStorage.getItem('pedidos_pendentes_aprovacao');
+  let pendentes = dados ? JSON.parse(dados) : [];
+  pendentes = pendentes.filter(function(p) { return p.id !== idPedido; });
+  localStorage.setItem('pedidos_pendentes_aprovacao', JSON.stringify(pendentes));
+
+  verificarPedidosPendentes('atualizar');
+  renderizarListaPendentes('atualizar');
+  if (pendentes.length === 0) {
+    abrirModalPendentes('fechar');
+  }
+}
+
+window.addEventListener('storage', function(evento) {
+  if (evento.key === 'pedidos_pendentes_aprovacao') {
+    verificarPedidosPendentes('storage');
+  }
+});
+
+setInterval(function() {
+  verificarPedidosPendentes('interval');
+}, 2000);
+
+verificarPedidosPendentes('inicial');

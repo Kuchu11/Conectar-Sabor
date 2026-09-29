@@ -18,8 +18,9 @@
           <span class="text-[10px] bg-[#10b981]/15 text-[#10b981] font-bold px-2 py-0.5 rounded-full border border-[#10b981]/30">● Churrasqueira 01</span>
         </div>
         <div class="flex items-center gap-1.5">
+          <a href="cliente.html" target="_blank" class="px-2 py-1 rounded-md text-[10px] font-bold bg-[#26262f] hover:bg-[#32323d] text-[#e5e1e4] border border-[#3c4a42]">Cardápio Online</a>
           <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#10b981] text-[#003824]">PDV</span>
-          <a href="kds.html" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#26262f] hover:bg-[#32323d] text-[#a1a1aa] transition-colors">Cozinha (KDS)</a>
+          <a href="kds.html" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#26262f] hover:bg-[#32323d] text-[#a1a1aa] transition-colors">Cozinha</a>
         </div>
       </div>
 
@@ -28,6 +29,13 @@
         <span class="flex items-center gap-1">📶 <strong class="text-[#10b981]">Sync Online</strong></span>
         <span class="font-display text-white">Turno 19:42</span>
       </div>
+
+      <button id="banner-pedidos-online" onclick="abrirModalPendentes('abrir')" class="hidden justify-between items-center bg-[#ea580c]/20 hover:bg-[#ea580c]/30 border border-[#ea580c] px-3 py-2 rounded-xl text-xs text-white transition-all animate-pulse">
+        <span class="flex items-center gap-2 font-bold">
+          <span>🛵</span> Pedidos Online Pendentes
+        </span>
+        <span id="badge-pendentes-count" class="bg-[#ea580c] text-white px-2 py-0.5 rounded-full font-bold text-[10px]">0</span>
+      </button>
     </div>
 
     <section id="view-pdv" class="flex-1 flex flex-col overflow-hidden">
@@ -93,6 +101,17 @@
         </div>
       </div>
     </section>
+  </div>
+
+  <div id="modal-pendentes" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#18181c] border border-[#2e2e38] rounded-2xl max-w-sm w-full p-4 flex flex-col gap-3 max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center pb-2 border-b border-[#2e2e38]">
+        <h3 class="font-display font-bold text-white text-sm">Pedidos Feitos pelos Clientes</h3>
+        <button onclick="abrirModalPendentes('fechar')" class="text-white text-xs">✕</button>
+      </div>
+
+      <div id="lista-pendentes-container" class="flex flex-col gap-3"></div>
+    </div>
   </div>
 
   <div id="print-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
